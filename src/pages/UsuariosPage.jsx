@@ -3,34 +3,40 @@ import { useMarcaStore } from "../store/MarcaStore";
 import { useEmpresaStore } from "../store/EmpresaStore";
 import { SpinnersLoading } from "../components/SpinnersLoading";
 import { TablaMarca } from "../components/tables/TablaMarca";
-import { RegistrarMarca } from "../components/RegistrarMarca";
 import { useState } from "react";
 import { Buscador } from "../components/Buscador";
+import { RegistrarUsuarios } from "../components/RegistrarUsuarios";
 import { useUsuariosStore } from "../store/UsuariosStore";
+import { TablaUsuarios } from "../components/tables/TablaUsuarios";
 import { BloqueoPagina } from "../components/BloquePagina";
 
-export function MarcaPage() {
-
-    const { dataPermisos } = useUsuariosStore()
-
-    const statePermisos = dataPermisos.some((objeto) => objeto.modulos.nombre.includes('Marca de productos'))
+export function UsuariosPage() {
 
     const [dataSelect, setDataSelect] = useState([])
     const [accion, setAccion] = useState('')
     const [openRegistro, setOpenRegistro] = useState(false)
 
-    const { mostrarMarca, dataMarca, buscarMarca, buscador } = useMarcaStore()
+    const { mostrarModulos, mostrarUsuariosTodos, dataUsuarios, buscarUsuarios, buscador, dataPermisos } = useUsuariosStore()
+
+    const statePermisos = dataPermisos.some((objeto) => objeto.modulos.nombre.includes('Personal'))
+
     const { dataempresa } = useEmpresaStore()
     const { isLoading, error } = useQuery({
-        queryKey: ['MostrarMarca', { id_empresa: dataempresa.empresa.id }],
-        queryFn: () => mostrarMarca({ id_empresa: dataempresa.empresa.id }),
+        queryKey: ['MostrarUsuarios', { _id_empresa: dataempresa.empresa.id }],
+        queryFn: () => mostrarUsuariosTodos({ _id_empresa: dataempresa.empresa.id }),
         enabled: dataempresa.empresa.id != null
     })
 
     const { data: buscarData } = useQuery({
-        queryKey: ['BuscarMarca', { id_empresa: dataempresa.empresa.id, descripcion: buscador }],
-        queryFn: () => buscarMarca({ id_empresa: dataempresa.empresa.id, descripcion: buscador }),
+        queryKey: ['BuscarUsuarios', { _id_empresa: dataempresa.empresa.id, buscador: buscador }],
+        queryFn: () => buscarUsuarios({ _id_empresa: dataempresa.empresa.id, buscador: buscador }),
         enabled: dataempresa.empresa.id != null
+    })
+
+    const { data: dataModulos } = useQuery({
+        queryKey: ['MostrarModulos'],
+        queryFn: () => mostrarModulos(),
+
     })
 
     const nuevoRegistro = () => {
@@ -40,7 +46,7 @@ export function MarcaPage() {
     }
 
     console.log(dataSelect)
-    const { setBuscador } = useMarcaStore()
+    const { setBuscador } = useUsuariosStore()
 
     if (statePermisos === false) {
         return <BloqueoPagina></BloqueoPagina>
@@ -54,27 +60,27 @@ export function MarcaPage() {
 
         <div className="p-6 bg-gray-100 min-h-screen">
             {openRegistro && (
-                <RegistrarMarca
+                <RegistrarUsuarios
                     dataSelect={dataSelect}
                     accion={accion}
                     onClose={() => setOpenRegistro(!openRegistro)}
                 />
             )}
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Marcas</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Personal</h2>
             <section className="mb-4">
                 <button
                     onClick={nuevoRegistro}
                     className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
                 >
-                    Agregar Marca
+                    Agregar Personal
                 </button>
             </section>
             <section className="mb-4">
                 <Buscador setBuscador={setBuscador} />
             </section>
             <section className="bg-white p-4 rounded-lg shadow-md">
-                <TablaMarca
-                    data={dataMarca}
+                <TablaUsuarios
+                    data={dataUsuarios}
                     setOpenRegistro={setOpenRegistro}
                     setDataSelect={setDataSelect}
                     setAccion={setAccion}

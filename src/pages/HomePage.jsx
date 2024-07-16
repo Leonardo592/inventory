@@ -19,8 +19,7 @@ export function HomePage() {
     enabled: !!dataempresa,
   });
 
-  console.log(data)
-
+  // console.log(data)
 
   const funcionXtipo = async (p) => {
     if (p.tipo === "cerrarsesion") {

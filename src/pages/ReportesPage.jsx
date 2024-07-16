@@ -2,14 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useMarcaStore } from "../store/MarcaStore";
 import { useEmpresaStore } from "../store/EmpresaStore";
 import { SpinnersLoading } from "../components/SpinnersLoading";
-import { TablaMarca } from "../components/tables/TablaMarca";
 import { RegistrarMarca } from "../components/RegistrarMarca";
 import { useState } from "react";
 import { Buscador } from "../components/Buscador";
 import { useUsuariosStore } from "../store/UsuariosStore";
 import { BloqueoPagina } from "../components/BloquePagina";
+import { ReporteKardex } from "../components/report/ReporteKardex";
+import { PDFViewer } from "@react-pdf/renderer";
+import { useKardexStore } from "../store/KardexStore";
 
-export function MarcaPage() {
+export function ReportesPage() {
 
     const { dataPermisos } = useUsuariosStore()
 
@@ -19,28 +21,15 @@ export function MarcaPage() {
     const [accion, setAccion] = useState('')
     const [openRegistro, setOpenRegistro] = useState(false)
 
-    const { mostrarMarca, dataMarca, buscarMarca, buscador } = useMarcaStore()
+    const { mostrarKardex, dataKardex } = useKardexStore()
     const { dataempresa } = useEmpresaStore()
+
+
     const { isLoading, error } = useQuery({
-        queryKey: ['MostrarMarca', { id_empresa: dataempresa.empresa.id }],
-        queryFn: () => mostrarMarca({ id_empresa: dataempresa.empresa.id }),
+        queryKey: ['MostrarKardex', { _id_empresa: dataempresa.empresa.id }],
+        queryFn: () => mostrarKardex({ _id_empresa: dataempresa.empresa.id }),
         enabled: dataempresa.empresa.id != null
     })
-
-    const { data: buscarData } = useQuery({
-        queryKey: ['BuscarMarca', { id_empresa: dataempresa.empresa.id, descripcion: buscador }],
-        queryFn: () => buscarMarca({ id_empresa: dataempresa.empresa.id, descripcion: buscador }),
-        enabled: dataempresa.empresa.id != null
-    })
-
-    const nuevoRegistro = () => {
-        setOpenRegistro(!openRegistro)
-        setAccion('Nuevo')
-        setDataSelect([])
-    }
-
-    console.log(dataSelect)
-    const { setBuscador } = useMarcaStore()
 
     if (statePermisos === false) {
         return <BloqueoPagina></BloqueoPagina>
@@ -60,8 +49,8 @@ export function MarcaPage() {
                     onClose={() => setOpenRegistro(!openRegistro)}
                 />
             )}
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Marcas</h2>
-            <section className="mb-4">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Reportes</h2>
+            {/* <section className="mb-4">
                 <button
                     onClick={nuevoRegistro}
                     className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
@@ -71,14 +60,11 @@ export function MarcaPage() {
             </section>
             <section className="mb-4">
                 <Buscador setBuscador={setBuscador} />
-            </section>
+            </section> */}
             <section className="bg-white p-4 rounded-lg shadow-md">
-                <TablaMarca
-                    data={dataMarca}
-                    setOpenRegistro={setOpenRegistro}
-                    setDataSelect={setDataSelect}
-                    setAccion={setAccion}
-                />
+                <PDFViewer style={{ width: '100%', height: '100%' }}>
+                    <ReporteKardex data={dataKardex}></ReporteKardex>
+                </PDFViewer>
             </section>
         </div>
     );
